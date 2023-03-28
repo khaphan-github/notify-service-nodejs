@@ -1,9 +1,10 @@
 import express from "express";
-import { NotifyController, RefreshTokenController } from "../api/notify/controller/notity.controller";
+import { NotifyController, TokenController } from "../api/notify/controller/notity.controller";
 
 const NotifyRoute = express.Router();
 
-NotifyRoute.post('/api/v1/service/notify', NotifyController);
-NotifyRoute.put('/api/v1/service/notify', RefreshTokenController);
+NotifyRoute.route('/api/v1/service/notify')
+  .post(NotifyController)
+  .put(TokenController);
 
 export default NotifyRoute;

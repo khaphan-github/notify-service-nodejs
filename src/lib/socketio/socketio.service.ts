@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
-import { AuthorizationSocketIO } from './socketio.middleware';
+import { ServerConfig } from '../../env/env.config';
+import { AuthorizationSocketIO, EmitMessageWhenConnected } from './socketio.middleware';
 
 export class SocketIOService {
   public io: Server;
@@ -9,7 +10,7 @@ export class SocketIOService {
       {
         cors:
         {
-          origin: 'http://localhost:3000',
+          origin: ServerConfig.ORIGIN_URI,
           allowedHeaders: ['Authorization'],
           credentials: true,
           methods: ['GET', 'POST']

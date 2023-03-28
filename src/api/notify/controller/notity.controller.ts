@@ -1,55 +1,51 @@
 import { Request, Response, NextFunction } from 'express';
 import { SocketIO } from '../../../..';
-import { CacheService } from '../../../lib/memcache/memcache.service';
-import { NotifyDTO } from '../model/notify.dto';
+import { SocketIDCache, TokenCache } from '../../../global.config';
+import { NotifyDTO } from '../dto/notify.dto';
+import { Token } from '../dto/token.dto';
+import { NotifyRepository } from '../repository/notify.repository';
 
-export const NotifyController = (req: Request, res: Response, next: NextFunction) => {
+const notifyRepository: NotifyRepository = new NotifyRepository();
 
-  /**
-   * LOGIC:
-   * Everywhen other service call api notification
-   * Socket io check connection to client:
-   *  If online -> send notification
-   *  If ofline -> save notification in cache
-   * Every message with format json
-   * 
-   * Everywhen client online 
-   *  Client connect to socket and get notifi from service
-   *  Then Invalid cache.
-   * 
-   * Problems:
-   * 1. What structure store in cache
-   * 2. How security soketio
-   * 
-   * Some solutions for security:
-   * - Store token then if token from socket client equal client recieve then authorize*/
+export const NotifyController = async (req: Request, res: Response, next: NextFunction) => {
 
-  // Trường hợp khi user kết nôi - server không có thông báo
-  // Trường hợp khi user không kết nối - server thông báo:
-  // 
-  const { uid } = req.params;
+  const MessageRequest: NotifyDTO = {
+    UserId: req.body.UserId,
+    Message: req.body.Message,
+  };
 
-  const caches: CacheService = new CacheService();
-  const notify: NotifyDTO = caches.get(uid) as NotifyDTO;
+  notifyRepository
+    .saveNotify(MessageRequest)
+    .then((savedNotify: any) => {
 
-  if (!notify) {
-    // Tạo 1 cái thông báo cho connection id này
-    // 
-  }
-  if (notify && SocketIO.isClientConnected(notify.connectionId)) {
+      const socketClientConnection: string = SocketIDCache.get(MessageRequest.UserId) as string;
+      const isUserOnline: boolean = SocketIO.isClientConnected(socketClientConnection);
 
-  }
+      if (isUserOnline) {
+        SocketIO.emitMessageTo(socketClientConnection, 'message', savedNotify);
+      }
 
+    })
+    .catch((error: any) => {
+      console.error(error);
+    });
 
-  SocketIO.emitMessageTo('connectionid', 'message', req.body);
-
-  res.status(200).json({
-    'Satus': 'Send request to notification service successfully',
-    'Data': req.body
+  res.status(201).json({
+    'Status': 'Service recieved message',
   }).end();
 }
 
+export const TokenController = (req: Request, res: Response, next: NextFunction) => {
+  
+  const MessageRequest: Token = {
+    UserId: req.body.UserId,
+    AccessToken: req.body.AccessToken,
+  };
 
-export const RefreshTokenController = (req: Request, res: Response, next: NextFunction) => {
+  TokenCache.set(MessageRequest.UserId, MessageRequest.AccessToken, 86400);
 
+  res.status(201).json({
+    'Status': 'Update token success',
+  }).end();
+  
 }
