@@ -1,5 +1,4 @@
 import { Socket } from 'socket.io';
-import { NotifyRepository } from '../../api/notify/repository/notify.repository';
 import { SocketIDCache, TokenCache } from '../../global.config';
 
 export const AuthorizationSocketIO = (socket: Socket, next: any): void => {
@@ -22,17 +21,4 @@ export const AuthorizationSocketIO = (socket: Socket, next: any): void => {
 
   next();
 }
-
-export const EmitMessageWhenConnected = (socket: Socket, next: any): void => {
-
-  const userId = socket.handshake.query.userId as string;
-
-  const notifyRepository: NotifyRepository = new NotifyRepository();
-  const connectionId: string = SocketIDCache.get(userId) as string;
-  
-  socket.emit(connectionId, notifyRepository.getNotifyByUserId(userId, 5))
-
-  next();
-}
-
 

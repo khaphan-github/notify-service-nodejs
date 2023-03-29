@@ -47,5 +47,4 @@ export const TokenController = (req: Request, res: Response, next: NextFunction)
   res.status(201).json({
     'Status': 'Update token success',
   }).end();
-  
 }

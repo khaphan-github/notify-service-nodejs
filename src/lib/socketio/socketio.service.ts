@@ -1,6 +1,7 @@
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import { EmitMessageFirstTimeWhenConnected, OnListenWhenClientEmit } from '../../api/notify/service/notify.service';
 import { ServerConfig } from '../../env/env.config';
-import { AuthorizationSocketIO, EmitMessageWhenConnected } from './socketio.middleware';
+import { AuthorizationSocketIO } from './socketio.middleware';
 
 export class SocketIOService {
   public io: Server;
@@ -21,8 +22,9 @@ export class SocketIOService {
     this.io.use(AuthorizationSocketIO);
 
     /**Enable connection */
-    this.io.on('connection', () => {
-      console.log('socketio connection established');
+    this.io.on('connection', (socket: Socket) => {
+      EmitMessageFirstTimeWhenConnected(socket, this.io);
+      OnListenWhenClientEmit(socket, this.io);
     });
 
     /**Configure error */
@@ -31,6 +33,7 @@ export class SocketIOService {
     });
   }
 
+  
   public emitMessageTo(connectionId: string, chanel: string, message: string) {
     this.io.to(connectionId).emit(chanel, message);
   }

@@ -22,8 +22,8 @@ export class NotifyRepository {
     return Notify.findOneAndUpdate(query, update, { new: true });
   }
 
-  public getNotifyByUserId = (userId: string, limit: number) => {
+  public getNotifyByUserId = async (userId: string, limit: number, page: number) => {
     const query = { UserId: userId };
-    return Notify.find(query).sort({ CreatedDate: -1 }).limit(limit);
+    return await Notify.find(query).sort({ CreatedDate: -1 }).skip(page * limit).limit(limit);
   }
 }

@@ -2,8 +2,6 @@ import { ServerConfig } from "../../env/env.config";
 import mongoose from 'mongoose';
 
 export class MongoDatabase {
-  constructor() {}
-
   connect() {
     const uri: string = ServerConfig.MONGO_URI + ServerConfig.MONGODB_DATABASE_NAME;
     mongoose
