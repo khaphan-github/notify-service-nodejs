@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  web:
+    build: ./notify-service-nodejs
+    command: npm run start
+    ports:2
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+
+  api:
+    build: ./SocialnetworkBE
+    command: dotnet run
+    ports:
+      - '5000:5000'
+    volumes:
+      - .:/app
+      - /app/obj
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+
+  db:
+    image: mongo
+    ports:
+      - '27017:27017'
+
+  client:
+    build: ./client
+    command: npm run start
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
